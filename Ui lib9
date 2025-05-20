@@ -785,23 +785,23 @@ library.createSlider = function(option, parent)
         end
     end)
 
-    local tweenService = game:GetService("TweenService")
-    
+    local TweenService = game:GetService("TweenService")
+
     function option:SetValue(value, nocallback)
         if typeof(value) ~= "number" then value = 0 end
         value = library.round(value, option.float)
         value = math.clamp(value, self.min, self.max)
     
-        local tweenInfo = TweenInfo.new(0.05, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+        local tweenInfo = TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
         
         if self.min >= 0 then
-            local sizeTween = tweenService:Create(option.fill, tweenInfo, {Size = UDim2.new((value - self.min) / (self.max - self.min), 0, 1, 0)})
-            sizeTween:Play()
+            local tween = TweenService:Create(option.fill, tweenInfo, {Size = UDim2.new((value - self.min) / (self.max - self.min), 0, 1, 0)})
+            tween:Play()
         else
-            local posTween = tweenService:Create(option.fill, tweenInfo, {Position = UDim2.new((0 - self.min) / (self.max - self.min), 0, 0, 0)})
-            local sizeTween = tweenService:Create(option.fill, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(value / (self.max - self.min), 0, 1, 0)})
-            posTween:Play()
-            sizeTween:Play()
+            local tweenPosition = TweenService:Create(option.fill, tweenInfo, {Position = UDim2.new((0 - self.min) / (self.max - self.min), 0, 0, 0)})
+            local tweenSize = TweenService:Create(option.fill, tweenInfo, {Size = UDim2.new(value / (self.max - self.min), 0, 1, 0)})
+            tweenPosition:Play()
+            tweenSize:Play()
         end
     
         library.flags[self.flag] = value
@@ -812,12 +812,12 @@ library.createSlider = function(option, parent)
             self.callback(value)
         end
     end
-    
     delay(1, function()
         if library then
             option:SetValue(option.value)
         end
     end)
+end
 
 library.createList = function(option, parent)
     option.hasInit = true
