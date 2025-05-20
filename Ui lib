@@ -51,6 +51,11 @@ function library:Create(class, properties)
         return nil 
     end
 
+    if type(create) ~= "function" then
+        warn("Error: 'create' function is undefined or nil.")
+        return nil
+    end
+
     local validDrawingClasses = {Square=true, Line=true, Text=true, Quad=true, Circle=true, Triangle=true}
     local usingDrawingAPI = validDrawingClasses[class]
     local inst = usingDrawingAPI and Drawing.new(class) or Instance.new(class)
@@ -80,9 +85,11 @@ function library:AddConnection(connection, name, callback)
     return connection
 end
 
-function library:Unload()
-    for _, c in next, self.connections do
+for _, c in next, self.connections do
+    if c and typeof(c.Disconnect) == "function" then
         c:Disconnect()
+    else
+        warn("Invalid connection found in Unload.")
     end
     for _, i in next, self.instances do
         if i.method then
