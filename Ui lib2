@@ -45,68 +45,6 @@ spawn(function()
     end
 end)
 
-function library:Create(class, properties)
-    if not class then 
-        warn("Error: Class is nil") -- Add a warning to debug the issue
-        return nil 
-    end
-
-    if type(create) ~= "function" then
-        warn("Error: 'create' function is undefined or nil.")
-        return nil
-    end
-
-    local validDrawingClasses = {Square=true, Line=true, Text=true, Quad=true, Circle=true, Triangle=true}
-    local usingDrawingAPI = validDrawingClasses[class]
-    local inst = usingDrawingAPI and Drawing.new(class) or Instance.new(class)
-
-    if not inst then
-        warn("Error: Failed to create instance for class - " .. tostring(class))
-        return nil
-    end
-
-    properties = properties or {}
-    for property, value in next, properties do
-        pcall(function() inst[property] = value end)
-    end
-
-    table.insert(self.instances, {object = inst, method = usingDrawingAPI})
-    return inst
-end
-
-function library:AddConnection(connection, name, callback)
-    callback = type(name) == "function" and name or callback
-    connection = connection:connect(callback)
-    if name ~= callback then
-        self.connections[name] = connection
-    else
-        table.insert(self.connections, connection)
-    end
-    return connection
-end
-
-for _, c in next, self.connections do
-    if c and typeof(c.Disconnect) == "function" then
-        c:Disconnect()
-    else
-        warn("Invalid connection found in Unload.")
-    end
-    for _, i in next, self.instances do
-        if i.method then
-            pcall(function() i.object:Remove() end)
-        else
-            i.object:Destroy()
-        end
-    end
-    for _, o in next, self.options do
-        if o.type == "toggle" then
-            coroutine.resume(coroutine.create(o.SetState, o))
-        end
-    end
-    library = nil
-    getgenv().library = nil
-end
-
 function library:LoadConfig(config)
     if table.find(self:GetConfigs(), config) then
         local Read, Config = pcall(function() return game:GetService"HttpService":JSONDecode(readfile(self.foldername .. "/" .. config .. self.fileext)) end)
